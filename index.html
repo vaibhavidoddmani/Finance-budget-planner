@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance Tracker App</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6f8;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 400px;
+            margin: 40px auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            padding: 24px;
+        }
+        h1 {
+            text-align: center;
+            color: #2d3748;
+        }
+        .balance {
+            font-size: 1.5em;
+            text-align: center;
+            margin-bottom: 16px;
+            color: #3182ce;
+        }
+        form {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 18px;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #cbd5e0;
+            border-radius: 4px;
+            font-size: 1em;
+        }
+        button {
+            background: #3182ce;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        button:hover {
+            background: #2b6cb0;
+        }
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+        li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        .income { color: #38a169; }
+        .expense { color: #e53e3e; }
+        .delete-btn {
+            background: #e53e3e;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            padding: 4px 8px;
+            cursor: pointer;
+        }
+        .delete-btn:hover {
+            background: #c53030;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Finance Tracker</h1>
+        <div class="balance" id="balance">Balance: $0.00</div>
+        <form id="transaction-form">
+            <input type="text" id="desc" placeholder="Description" required>
+            <input type="number" id="amount" placeholder="Amount" required>
+            <select id="type">
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+            <button type="submit">Add</button>
+        </form>
+        <ul id="transactions"></ul>
+    </div>
+    <script>
+        const form = document.getElementById('transaction-form');
+        const descInput = document.getElementById('desc');
+        const amountInput = document.getElementById('amount');
+        const typeInput = document.getElementById('type');
+        const transactionsList = document.getElementById('transactions');
+        const balanceDiv = document.getElementById('balance');
+
+        let transactions = [];
+
+        function updateBalance() {
+            let balance = 0;
+            transactions.forEach(tx => {
+                if (tx.type === 'income') balance += tx.amount;
+                else balance -= tx.amount;
+            });
+            balanceDiv.textContent = `Balance: $${balance.toFixed(2)}`;
+        }
+
+        function renderTransactions() {
+            transactionsList.innerHTML = '';
+            transactions.forEach((tx, idx) => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <span class="${tx.type}">${tx.desc} - $${tx.amount.toFixed(2)} (${tx.type})</span>
+                    <button class="delete-btn" onclick="deleteTransaction(${idx})">Delete</button>
+                `;
+                transactionsList.appendChild(li);
+            });
+        }
+
+        function deleteTransaction(idx) {
+            transactions.splice(idx, 1);
+            renderTransactions();
+            updateBalance();
+        }
+        window.deleteTransaction = deleteTransaction;
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const desc = descInput.value.trim();
+            const amount = parseFloat(amountInput.value);
+            const type = typeInput.value;
+            if (!desc || isNaN(amount) || amount <= 0) return;
+            transactions.push({ desc, amount, type });
+            descInput.value = '';
+            amountInput.value = '';
+            renderTransactions();
+            updateBalance();
+        });
+    </script>
+</body>
+</html>
